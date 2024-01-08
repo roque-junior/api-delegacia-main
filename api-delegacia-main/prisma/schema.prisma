@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Criminoso {
+  id       String  @id @default(uuid()) @db.Uuid
+  nome     String  @db.VarChar(60)
+  cpf      String  @unique @db.VarChar(14)
+  idade    Int?
+  endereco String? @db.VarChar(255)
+
+  crime Crime[]
+
+  dtHrCriacao     DateTime @default(now()) @map("dt_hr_criacao")
+  dtHrAtualizacao DateTime @updatedAt @map("dt_hr_atualizacao")
+
+  @@map("criminoso")
+}
+
+model Crime {
+  id          String   @id @default(uuid()) @db.Uuid
+  idCriminoso String   @map("id_criminoso") @db.Uuid
+  data        String    @db.VarChar(10)
+  local       String   @db.VarChar(255)
+  tipoDoCrime String   @map("tipo_do_crime") @db.VarChar(100)
+  descricao   String   @db.Text
+
+  criminoso Criminoso @relation(fields: [idCriminoso], references: [id])
+  arma      Arma[]
+
+  dtHrCriacao     DateTime @default(now()) @map("dt_hr_criacao")
+  dtHrAtualizacao DateTime @updatedAt @map("dt_hr_atualizacao")
+
+  @@map("crime")
+}
+
+model Arma {
+  id            String  @id @default(uuid()) @db.Uuid
+  idCrime       String  @map("id_crime") @db.Uuid
+  nome          String  @db.VarChar(60)
+  tipo          String  @db.VarChar(60)
+  numeroDeSerie String? @map("numero_de_serie") @db.VarChar(60)
+  marca         String  @db.VarChar(60)
+
+  crime Crime @relation(fields: [idCrime], references: [id])
+
+  dtHrCriacao     DateTime @default(now()) @map("dt_hr_criacao")
+  dtHrAtualizacao DateTime @updatedAt @map("dt_hr_atualizacao")
+
+  @@map("arma")
+}
